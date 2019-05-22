@@ -126,20 +126,29 @@ public class PrestoServer
         try {
             Injector injector = app.strictConfig().initialize();
 
+            // 生 成PluginManager实例，载入/data0/presto/data/plugin目录下的.ja
             injector.getInstance(PluginManager.class).loadPlugins();
 
+            //生成StaticCatalogStore实例，载入.properties配置文件
             injector.getInstance(StaticCatalogStore.class).loadCatalogs();
 
             // TODO: remove this huge hack
+            //更新UUID, ServiceAnnouncement
             updateConnectorIds(
                     injector.getInstance(Announcer.class),
                     injector.getInstance(CatalogManager.class),
                     injector.getInstance(ServerConfig.class),
                     injector.getInstance(NodeSchedulerConfig.class));
 
+            //接口，无具体方法实现
             injector.getInstance(SessionPropertyDefaults.class).loadConfigurationManager();
             injector.getInstance(ResourceGroupManager.class).loadConfigurationManager();
+
+            //生成AccessControlManager实例，如果路径etc/下存在文件access-control.properties
+            //如果检查通过，或者不存在该文件，打印日志信息"-- Loaded system access control allow-all --"
             injector.getInstance(AccessControlManager.class).loadSystemAccessControl();
+
+            // 原理过程大致同上
             injector.getInstance(PasswordAuthenticatorManager.class).loadPasswordAuthenticator();
             injector.getInstance(EventListenerManager.class).loadConfiguredEventListener();
 
