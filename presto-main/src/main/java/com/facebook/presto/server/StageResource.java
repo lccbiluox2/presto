@@ -23,6 +23,10 @@ import javax.ws.rs.PathParam;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * 与Stage相关的RESTful请求均由Stage服务接口处理，其实该接口只提供了- -个功能，
+ 就是取消或者结束-一个指定的Stage。Stage 服务接口的实现类为StageResource
+ */
 @Path("/v1/stage")
 public class StageResource
 {
@@ -34,6 +38,10 @@ public class StageResource
         this.queryManager = requireNonNull(queryManager, "queryManager is null");
     }
 
+    /**
+     * //地址匁: /v1/stage/stageID 的DELETE靖求由以下方法赴理，亥方法取消或者提前結束- -个Stage
+     * @param stageId
+     */
     @DELETE
     @Path("{stageId}")
     public void cancelStage(@PathParam("stageId") StageId stageId)

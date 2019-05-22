@@ -80,6 +80,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
  * Manages tasks on this worker node
+ *
+ * 与Task相关的RESTful请求均由Task服务接口处理，包括Task的创建、更新、状态
+ 查询和结果查询等。Task服务接口的实现类为TaskResource
  */
 @Path("/v1/task")
 public class TaskResource
@@ -119,6 +122,15 @@ public class TaskResource
         return allTaskInfo;
     }
 
+    /**
+     * //URI为: /v1/task/taskID 的Post均由以下方法处理，这种请求主要包括两种:创建一个新的Task
+     或者更新Task的状态
+
+     * @param taskId
+     * @param taskUpdateRequest
+     * @param uriInfo
+     * @return
+     */
     @POST
     @Path("{taskId}")
     @Consumes({APPLICATION_JSON, APPLICATION_JACKSON_SMILE})
@@ -127,6 +139,10 @@ public class TaskResource
     {
         requireNonNull(taskUpdateRequest, "taskUpdateRequest is null");
 
+        /**
+         * //若存在taskId对应的Task,就根据taskUpdateRequest中的内容更新该Task;否则就
+         根据taskUpdateRequest中的内容创建-一个新的Task
+         */
         Session session = taskUpdateRequest.getSession().toSession(sessionPropertyManager);
         TaskInfo taskInfo = taskManager.updateTask(session,
                 taskId,
@@ -142,6 +158,10 @@ public class TaskResource
         return Response.ok().entity(taskInfo).build();
     }
 
+    /**
+     * //URI为: /vl/task/taskId 的Get请求，均由以下方法处理，下面方法的作用是根据taskId获得指
+     定的Task的相关信息，并返回给客户端
+     */
     @GET
     @Path("{taskId}")
     @Consumes({APPLICATION_JSON, APPLICATION_JACKSON_SMILE})
@@ -216,6 +236,15 @@ public class TaskResource
                 .withTimeout(timeout);
     }
 
+    /**
+     * //URI为: /v1/task/taskId 的delete请求，均由以下方法处理，以下方法将TaskId对应的Task
+     进行删除或者提前结束
+
+     * @param taskId
+     * @param abort
+     * @param uriInfo
+     * @return
+     */
     @DELETE
     @Path("{taskId}")
     @Consumes({APPLICATION_JSON, APPLICATION_JACKSON_SMILE})
@@ -241,6 +270,16 @@ public class TaskResource
         return taskInfo;
     }
 
+
+    /**
+     * //URI为: /v1/task/taskId/results/ output Id/token的Get请求均由以下方法处理，该方法用
+     于获得TaskId指定的Task生成的用于输出给某个下游Task (该Task由outputId标示)的数据
+     * @param taskId
+     * @param bufferId
+     * @param token
+     * @param maxSize
+     * @param asyncResponse
+     */
     @GET
     @Path("{taskId}/results/{bufferId}/{token}")
     @Produces(PRESTO_PAGES)
@@ -313,6 +352,14 @@ public class TaskResource
         taskManager.acknowledgeTaskResults(taskId, bufferId, token);
     }
 
+    /**
+     * //URIカ: /v1/task/taskId/results/outputId的Delete靖求均由以下方法処理，亥方法用于清
+     除TaskId杯示的Task生成的，用于輸出給下游Task (核Task由outputId柝示)的数据
+
+     * @param taskId
+     * @param bufferId
+     * @param uriInfo
+     */
     @DELETE
     @Path("{taskId}/results/{bufferId}")
     @Produces(APPLICATION_JSON)

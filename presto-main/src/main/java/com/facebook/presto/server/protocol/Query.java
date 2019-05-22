@@ -366,6 +366,11 @@ class Query
     public synchronized QueryResults getNextResult(OptionalLong token, UriInfo uriInfo, String scheme, DataSize targetResultSize)
     {
         // check if the result for the token have already been created
+        /**
+         * 若token不为空，则执行query.getCachedResult方法，否则就执行query.QueryResults
+         方法，因为在createQuery方法中传入的该参数为: Optional. empty(),因此其值为空，则执行方法:
+         query . NextResults方法。注意: Query实际上是StatementResource的内部类
+         */
         if (token.isPresent()) {
             Optional<QueryResults> cachedResult = getCachedResult(token.getAsLong(), uriInfo);
             if (cachedResult.isPresent()) {

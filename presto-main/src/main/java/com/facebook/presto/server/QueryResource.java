@@ -41,6 +41,9 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Manage queries scheduled on this node
+ *
+ * 与查询执行相关的RESTful请求均由Query服务接口处理，包括SQL语句的提交、获
+ 取查询执行的结果、取消查询等。Query 服务接口的实现类为QueryResource
  */
 @Path("/v1/query")
 public class QueryResource
@@ -66,6 +69,12 @@ public class QueryResource
         return builder.build();
     }
 
+    /**
+     * //地址为: /v1/query/queryID的GET请求由以下方法处理，该方法返回一个查询执行的状态信息
+     *
+     * @param queryId
+     * @return
+     */
     @GET
     @Path("{queryId}")
     public Response getQueryInfo(@PathParam("queryId") QueryId queryId)
@@ -81,6 +90,11 @@ public class QueryResource
         }
     }
 
+    /**
+     * //地址为: /v1/query/queryID 的DELETE请求由以下方法处理，该方法取消一个查询
+     *
+     * @param queryId
+     */
     @DELETE
     @Path("{queryId}")
     public void cancelQuery(@PathParam("queryId") QueryId queryId)
@@ -129,6 +143,10 @@ public class QueryResource
         }
     }
 
+    /**
+     * //地址为: /v1/query/stage/ stageID的DELETE请求由以下方法处理，该方法取消一个Stage
+     * @param stageId
+     */
     @DELETE
     @Path("stage/{stageId}")
     public void cancelStage(@PathParam("stageId") StageId stageId)
