@@ -40,6 +40,20 @@ public class DropTableTask
         return "DROP TABLE";
     }
 
+
+    /**
+     * 从上面的代码可以看出，首先调用Metadata 的getTableHandle 方法，根据表名获取
+     TableHandle,如果DROP的表不存在且SQL语句中没有IF NOT EXISTS判断，则抛出异:
+     常;如果表存在，则调用Metadata API的dropTable方法删除表。
+
+     * @param statement
+     * @param transactionManager
+     * @param metadata
+     * @param accessControl
+     * @param stateMachine
+     * @param parameters
+     * @return
+     */
     @Override
     public ListenableFuture<?> execute(DropTable statement, TransactionManager transactionManager, Metadata metadata, AccessControl accessControl, QueryStateMachine stateMachine, List<Expression> parameters)
     {

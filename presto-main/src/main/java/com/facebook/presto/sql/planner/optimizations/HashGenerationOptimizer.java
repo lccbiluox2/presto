@@ -90,6 +90,10 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Stream.concat;
 
+/**
+ * HashGenerationOptimizer优化器用于对那些需要计算Hash值的执行计划节点，在执行
+ 计划阶段时提前对Hash值进行计算，而不是在查询执行阶段计算Hash值。
+ */
 public class HashGenerationOptimizer
         implements PlanOptimizer
 {

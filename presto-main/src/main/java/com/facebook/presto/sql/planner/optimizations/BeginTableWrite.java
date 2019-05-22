@@ -56,6 +56,10 @@ import static java.util.stream.Collectors.toSet;
  * This logic should be invoked on query start, not during planning. At that point, the token
  * returned by beginCreate/beginInsert should be handed down to tasks in a mapping separate
  * from the plan that links plan nodes to the corresponding token.
+ *
+ * 确切地说，BeginTableWrite 并不是-一个优化器，其作用是根据SQL语句类型调用
+beginCreate/beginInsert,然后构造CreateHandle/InsertHandle, 用于TableWriterNode 后续操
+作。
  */
 public class BeginTableWrite
         implements PlanOptimizer

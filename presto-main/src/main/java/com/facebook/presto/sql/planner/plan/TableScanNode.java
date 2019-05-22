@@ -32,6 +32,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * TableScanNode用于读取表的数据。
+ */
 @Immutable
 public class TableScanNode
         extends PlanNode

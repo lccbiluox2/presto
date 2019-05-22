@@ -63,6 +63,16 @@ import static java.lang.Math.toIntExact;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 
+/**
+ * WindowFiterPushDown优化器用于处理窗口函数row_ number 中排序取前N条结果，
+ 如以下代码所示。
+
+    SELECT X FROM (SELECT x，row number () OVER (ORDER BY x) rn FROM. ..) WHERE rn < 10;
+
+ 该优化器会将原来执行计划中的WindowNode 替换为TopNRowNumberNode,应用
+ TopN算法避免全局排序，提高执行效率。
+
+ */
 public class WindowFilterPushDown
         implements PlanOptimizer
 {

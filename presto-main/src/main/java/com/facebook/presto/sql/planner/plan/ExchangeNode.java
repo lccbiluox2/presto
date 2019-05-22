@@ -42,6 +42,10 @@ import static com.facebook.presto.util.MoreLists.listOfListsCopy;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * ExchangeNode是用于在执行计划中不同Stage之间交换数据的节点，出现在逻辑执行
+ 计划中。:
+ */
 @Immutable
 public class ExchangeNode
         extends PlanNode

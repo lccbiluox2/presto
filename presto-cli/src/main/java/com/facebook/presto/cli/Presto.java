@@ -19,15 +19,29 @@ public final class Presto
 {
     private Presto() {}
 
+    /**
+     * 命令行查询页面
+     *
+     * @param args
+     */
     public static void main(String[] args)
     {
+        /**
+         * //根据传递的参数初始化一个Console对象，该对象中保存了启动Cli时传入的所有参数
+         */
         Console console = singleCommand(Console.class).parse(args);
 
+        /**
+         * //若启动的时候使用了--help或者--version则会显示帮助信息或者版本信息，然后直接退出
+         */
         if (console.helpOption.showHelpIfRequested() ||
                 console.versionOption.showVersionIfRequested()) {
             return;
         }
 
+        /**
+         * //进入主程序，然后根据启动CLI传入的不同参数进行不同的处理
+         */
         System.exit(console.run() ? 0 : 1);
     }
 }

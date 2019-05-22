@@ -36,6 +36,11 @@ import static com.facebook.presto.sql.planner.plan.AggregationNode.Step.SINGLE;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * AggregationNode是用于聚合操作的节点，聚合的类型有FINAL、PARTIAL、 SINGLE
+ 三种，分别表示最终聚合、局部聚合和单点聚合，其中执行计划在进行优化之前，聚合的
+ 类型都是单点聚合，在执行计划优化器中会对其进行拆分成局部聚合和最终聚合。
+ */
 @Immutable
 public class AggregationNode
         extends PlanNode

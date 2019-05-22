@@ -84,16 +84,29 @@ public class Console
 
     public boolean run()
     {
+        /**
+         * //获取所有的client Session 参数，这些参数被组装到ClientSession类中
+         */
         ClientSession session = clientOptions.toClientSession();
+        /**
+         * //如果cli启动的时候指定了--execute参数，则hasQuery的值为true,说明需要直接
+         执行通过shell传入的SQL语句
+         */
         boolean hasQuery = !isNullOrEmpty(clientOptions.execute);
+        /**
+         * //如果 cli启动的时候指定 了-f或者--file 参数，则isFromFile 的值为true,说明读
+         取文件中的SQL语句执行
+         */
         boolean isFromFile = !isNullOrEmpty(clientOptions.file);
 
         if (!hasQuery && !isFromFile) {
             AnsiConsole.systemInstall();
         }
 
+        // 初始化日志
         initializeLogging(clientOptions.logLevelsFile);
 
+        // 获取 --execute参数对应的内容
         String query = clientOptions.execute;
         if (hasQuery) {
             query += ";";
@@ -101,10 +114,17 @@ public class Console
 
         if (isFromFile) {
             if (hasQuery) {
+                // //在启动Cli的时候不能同时指定--execute和--file参数
                 throw new RuntimeException("both --execute and --file specified");
             }
             try {
+                //从文件中读取SQL语句
                 query = Files.asCharSource(new File(clientOptions.file), UTF_8).read();
+                /**
+                 *  启动Cli的时候即使没有使用--execute参数，但是指定了--file参数，也可以将
+                 hasQuery标示属性设置为true,此时该标示属性的意义已经改变，不再标示是否指定
+                 了--execute属性，而是标示是否在启动CLI的时候就指定了SQL语句。
+                 */
                 hasQuery = true;
             }
             catch (IOException e) {
@@ -122,6 +142,9 @@ public class Console
             awaitUninterruptibly(exited, EXIT_DELAY.toMillis(), MILLISECONDS);
         }));
 
+        /**
+         * 生成一个查询执行包装类，后续的查询都会通过该类启动和执行。
+         */
         try (QueryRunner queryRunner = new QueryRunner(
                 session,
                 clientOptions.debug,
@@ -140,10 +163,16 @@ public class Console
                 Optional.ofNullable(clientOptions.krb5KeytabPath),
                 Optional.ofNullable(clientOptions.krb5CredentialCachePath),
                 !clientOptions.krb5DisableRemoteServiceHostnameCanonicalization)) {
+
+            /**
+             * //若启动Cli的时候指定了--execute或者--file参数，则执行方法:
+             executeCommand ... ,否则就直接启动Cli,接受终端用户在Cli中的输入，并提交查询。
+             */
             if (hasQuery) {
+                /** 直接提交SQL */
                 return executeCommand(queryRunner, query, clientOptions.outputFormat, clientOptions.ignoreErrors);
             }
-
+            /** 启动Cli窗口，接收用户输入，分析sql语句并且提交 */
             runConsole(queryRunner, exiting);
             return true;
         }
@@ -274,9 +303,16 @@ public class Console
     private static boolean executeCommand(QueryRunner queryRunner, String query, OutputFormat outputFormat, boolean ignoreErrors)
     {
         boolean success = true;
+        /**
+         * // Statementsplitter对输入的连续SQL语句进行切分，默认是为字符“;”作为SQL语
+         句的分隔符
+         */
         StatementSplitter splitter = new StatementSplitter(query);
         for (Statement split : splitter.getCompleteStatements()) {
             if (!isEmptyStatement(split.statement())) {
+                /**
+                 * 获取一条SQL 并且处理
+                 */
                 if (!process(queryRunner, split.statement(), outputFormat, () -> {}, false)) {
                     if (!ignoreErrors) {
                         return false;
@@ -300,8 +336,7 @@ public class Console
                     Optional.ofNullable(queryRunner.getSession().getCatalog()),
                     Optional.ofNullable(queryRunner.getSession().getSchema()),
                     sql);
-        }
-        catch (QueryPreprocessorException e) {
+        } catch (QueryPreprocessorException e) {
             System.err.println(e.getMessage());
             if (queryRunner.isDebug()) {
                 e.printStackTrace();
@@ -309,7 +344,12 @@ public class Console
             return false;
         }
 
+        /** 执行查询 */
         try (Query query = queryRunner.startQuery(finalSql)) {
+            /**
+             * //输出结果，请注意:上面的执行查询 只是发起一次RESTful 请求而已，而前面所述的cli
+             循环分批显示查询结果，则是在该方法中循环发送不同的RESTful请求来实现的。
+             */
             boolean success = query.renderOutput(System.out, outputFormat, interactive);
 
             ClientSession session = queryRunner.getSession();

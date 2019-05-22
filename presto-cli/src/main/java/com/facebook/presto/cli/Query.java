@@ -126,6 +126,7 @@ public class Query
             clientThread.interrupt();
         });
         try {
+            /** //循环获取查询结果，并动态显示在终端都是在该方法中完成的  */
             return renderQueryOutput(out, outputFormat, interactive);
         }
         finally {
@@ -141,15 +142,20 @@ public class Query
         PrintStream errorChannel = interactive ? out : System.err;
         WarningsPrinter warningsPrinter = new PrintStreamWarningsPrinter(System.err);
 
+        /**
+         * //根据传入的interactive标示的内容，决定是否实时更新结果，若interactive为true,
+         则动态更新结果;否则不动态更新结果
+         */
         if (interactive) {
             statusPrinter = new StatusPrinter(client, out, debug);
+            /** //若需要动态显示查询结果，则进行间隔打印结果的操作 */
             statusPrinter.printInitialStatusUpdates();
-        }
-        else {
+        } else {
             processInitialStatusUpdates(warningsPrinter);
         }
 
         // if running or finished
+        // 根据client的不同状态，进行不同的后续处理工作
         if (client.isRunning() || (client.isFinished() && client.finalStatusInfo().getError() == null)) {
             QueryStatusInfo results = client.isRunning() ? client.currentStatusInfo() : client.finalStatusInfo();
             if (results.getUpdateType() != null) {
@@ -196,8 +202,12 @@ public class Query
 
     private void processInitialStatusUpdates(WarningsPrinter warningsPrinter)
     {
+        /**
+         * 客户端还在运行，而且还有数据的时候
+         */
         while (client.isRunning() && (client.currentData().getData() == null)) {
             warningsPrinter.print(client.currentStatusInfo().getWarnings(), true, false);
+            /** //获得下一批结果，注意:如果server端暂时还没有产生数据，将会等待一段时间 */
             client.advance();
         }
         List<PrestoWarning> warnings;

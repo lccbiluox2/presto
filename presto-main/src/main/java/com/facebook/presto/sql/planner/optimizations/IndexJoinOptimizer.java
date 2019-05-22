@@ -69,6 +69,10 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 
+/**
+ * IndexJoinOptimizer优化器用于将Join优化为IndexJoin,获取做Join 操作的表的Index,
+ 并依此进行Join操作。
+ */
 public class IndexJoinOptimizer
         implements PlanOptimizer
 {

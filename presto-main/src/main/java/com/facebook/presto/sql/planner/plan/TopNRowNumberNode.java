@@ -30,6 +30,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.concat;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * TopNRowNumberNode用于处理窗口函数row_ number 中排序取前N条结果，使用效率
+ 更高的TopN算法，如:
+
+ SELECT X ? FROM (SELECT x, row number() OVER (ORDER BYx) rn FROM .. .) WHERE rn< 11;
+
+ 该SQL中的子查询用于取x，以及按x升序排列的行号，最后取出行号小于11的x。
+ Presto会选取TopNRowNumberNode来选取行号小于11的x，即最小的10条x。
+
+ */
 @Immutable
 public final class TopNRowNumberNode
         extends PlanNode

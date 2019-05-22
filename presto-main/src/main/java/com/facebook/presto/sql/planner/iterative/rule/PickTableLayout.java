@@ -74,6 +74,11 @@ import static java.util.Objects.requireNonNull;
 /**
  * These rules should not be run after AddExchanges so as not to overwrite the TableLayout
  * chosen by AddExchanges
+ *
+ * 该优化器根据SQL语句选取最合适的TableL ayout。
+ TableLayout是指一个 表的组织结构,例如表的分区、表的列等。根据具体的SQL语句，
+ 可能只需要选取表的某几列，也可能只需要表的一部分分区，最后根据这些属性构造的
+ TableLayout就是最适合当前SQL语句的TableLayout.
  */
 public class PickTableLayout
 {

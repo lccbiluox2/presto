@@ -39,6 +39,18 @@ import java.util.Optional;
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * LimitPushDown优化器用于将limit 条件进行下推,从而减少下层节点所处理的数据量，
+ 提高执行效率。
+ ●如果limit值为0， 则不再进行下推，直接返回一个值为空的ValuesNode。
+ ●当limit 条件下推到AggregationNode时,如果是Distinct聚合,则将AggregationNode
+ 替换为DistinctLimitNode。
+ ●当limit条件下推到TopNNode时，根据limit 的值和TopNNode中N的值，取其最
+ 小值构造-一个新的TopNNode.
+ ●当limit 条件下推到SortNode时，将SortNode替换为TopNNode。
+ ●当limit条件下推到UnionNode 时，在UnionNode 的每-一个子节点之上添加一个
+ LimitNode。
+ */
 public class LimitPushDown
         implements PlanOptimizer
 {

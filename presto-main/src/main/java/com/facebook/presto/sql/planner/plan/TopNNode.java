@@ -29,6 +29,16 @@ import static com.facebook.presto.util.Failures.checkCondition;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * TopNNode用于取数据排序后的前N条结果，使用效率更高的TopN算法，而不是对所
+ 有数据进行全局排序再取前N条，TopN问题与算法不再具体详述，请自行查找资料，如:
+
+ SELECT 1 orderkey FROM LINEITEM ORDER BY 1 orderkey limit 10;
+
+ 该SQL会取最小的10条1_ orderkey, Presto 会选取TopNNode而不是SortNode来进行
+ 排序取最小的10条I_ orderkey。
+
+ */
 @Immutable
 public class TopNNode
         extends PlanNode

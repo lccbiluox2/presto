@@ -21,6 +21,9 @@ import java.util.Optional;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 
+/**
+ * visiTableSubquery处理TableSubquery所关联的查询语句并返回生成的执行计划。
+ */
 public class TableSubquery
         extends QueryBody
 {

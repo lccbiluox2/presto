@@ -13,6 +13,16 @@
  */
 package com.facebook.presto.matching.example.rel;
 
+/**
+ * ProjectNode是用于进行列映射的节点，用于将ProjectNode 下 层节点输出的列映射到
+ ProjectNode.上层节点输入的列，例如:
+
+ select 1_orderkey+1 from lineitem
+
+ ProjectNode会将其下层TableScanNode输出的I_ orderkey 作为输入，映射为1 orderkey+1
+ 并传递给上层节点。
+
+ */
 public class ProjectNode
         implements SingleSourceRelNode
 {

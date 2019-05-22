@@ -27,6 +27,10 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * RemoteSourceNode类似ExchangeNode,用于分布式执行计划中不同的Stage之间交换
+ 数据，出现在分布式执行计划中。
+ */
 @Immutable
 public class RemoteSourceNode
         extends PlanNode

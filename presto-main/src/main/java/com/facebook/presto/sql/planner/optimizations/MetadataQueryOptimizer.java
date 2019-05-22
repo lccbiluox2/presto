@@ -60,6 +60,20 @@ import static java.util.Objects.requireNonNull;
 /**
  * Converts cardinality-insensitive aggregations (max, min, "distinct") over partition keys
  * into simple metadata queries
+ *
+ * 该优化器用于优化只对表的分区字段进行的聚合操作，将其改写为针对表元数据的查
+ 询，省去了读取原始表的操作。
+ 例如以下的语句:
+     SELECT min(key)，max(key) FROM t
+     SELECT DISTINCT keyFROM t
+     SELECT count (DISTINCTkey) FROM t
+     OlostenioOinuoO
+     SELECT count (DISTINCTkey+5) FROMt
+     SELECT count (DISTINCT key) FROM (SELECT key FROM t ORDERBY1 LIMIT10) ;
+     SELECT key1, count (DISTINCT key2) FROM t，GROUP BY 1
+ 字段key、key1、key2都是分区字段，这些语句经过优化后都会被改写为针对表元数据
+ 的查询。
+
  */
 public class MetadataQueryOptimizer
         implements PlanOptimizer

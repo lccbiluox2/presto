@@ -27,6 +27,11 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * MarkDistinctNode是用于处理以下类型的SQL语句的节点。
+ *
+ * select count(distinct ..) from ...
+ */
 @Immutable
 public class MarkDistinctNode
         extends PlanNode

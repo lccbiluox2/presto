@@ -100,6 +100,18 @@ import static java.util.Objects.requireNonNull;
  * gets rewritten as
  * <p>
  * {@code Output[$0] -> Project[$0 := $1 + $2] -> ...}
+ *
+ *
+ * PruneUnreferencedOutputs优化器用于去除ProjectNode中不在最终输出中的列,例如将
+ *
+    Output[$0] -> Project[$0:= $1+$2，$3-$4/$5] -.
+
+ 改写为
+
+    Output[$0] -> Project[$0:= $1+ $2]一 > ...
+
+ 去除多余的列可以减少中间结果的计算量，提高执行效率。
+
  */
 public class PruneUnreferencedOutputs
         implements PlanOptimizer

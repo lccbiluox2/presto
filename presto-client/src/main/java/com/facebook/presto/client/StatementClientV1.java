@@ -127,6 +127,13 @@ class StatementClientV1
         this.user = session.getUser();
         this.clientCapabilities = Joiner.on(",").join(ClientCapabilities.values());
 
+        // 上面是合法性检查和赋值等操作
+
+        /**
+         *
+         //在Presto中是通过向Coordinator提供的RESTful服务结构发送HTTP请求来执行查询的，
+         下面的方法生成用于发送给Coordinator上的RESTful 服务接口的，发起SQL查询的HTTP请求
+         */
         Request request = buildQueryRequest(session, query);
 
         JsonResponse<QueryResults> response = JsonResponse.execute(QUERY_RESULTS_CODEC, httpClient, request);
@@ -135,20 +142,33 @@ class StatementClientV1
             throw requestFailedException("starting query", request, response);
         }
 
+        /** 处理返回的结果 */
         processResponse(response.getHeaders(), response.getValue());
     }
 
     private Request buildQueryRequest(ClientSession session, String query)
     {
+        /**
+         * session.getServer的内容就是启动CLI客户端时，通过参数： --server 指定的的 Coordinator地址，因此最终胜出的RESTful的URL
+         * 是一个内容为 CoordinatiorIP地址  地址：端口/v1/statement 类型为POST的请求
+         */
         HttpUrl url = HttpUrl.get(session.getServer());
         if (url == null) {
             throw new ClientException("Invalid server URL: " + session.getServer());
         }
         url = url.newBuilder().encodedPath("/v1/statement").build();
 
+        /**
+         * session.getServer的内容就是启动CLI客户端时，通过参数： --server 指定的的 Coordinator地址，因此最终胜出的RESTful的URL
+         * 是一个内容为 CoordinatiorIP地址  地址：端口/v1/statement 类型为POST的请求
+         */
         Request.Builder builder = prepareRequest(url)
                 .post(RequestBody.create(MEDIA_TYPE_TEXT, query));
 
+
+        /**
+         * 下面是一堆 合法性检查 和赋值操作等
+         */
         if (session.getSource() != null) {
             builder.addHeader(PRESTO_SOURCE, session.getSource());
         }
@@ -330,6 +350,11 @@ class StatementClientV1
                 .url(url);
     }
 
+    /**
+     * 1/ 该方法通过使用由coordinator返回的nextResultUri向Coordinator发送请求，来分批获得查
+     询执行结果
+     * @return
+     */
     @Override
     public boolean advance()
     {
@@ -337,7 +362,16 @@ class StatementClientV1
             return false;
         }
 
+        /**
+         * //获得请求下一批结果的URI,该URI是由Coordinator生成，并返回给Client端的，在前
+         面提交查询的代码处，对nextUri的生成已经进行了讲解，该URI的内容为:
+         /v1/statement/queryID/token,该URI对应的RestFul请求也是由StatementResource类的
+         getQueryResults方法处理
+         */
         URI nextUri = currentStatusInfo().getNextUri();
+        /**
+         * //请注意:若所有的查询结果均已经返回，则coordinator会将nextUri设置为NULL
+         */
         if (nextUri == null) {
             state.compareAndSet(State.RUNNING, State.FINISHED);
             return false;
@@ -441,6 +475,10 @@ class StatementClientV1
             clearTransactionId.set(true);
         }
 
+        /**
+         * //将返回的结果设置到Client端的currentResults中，注意QueryResults中含有
+         nextResultUri
+         */
         currentResults.set(results);
     }
 

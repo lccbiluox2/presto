@@ -99,6 +99,20 @@ import static com.google.common.collect.Iterables.filter;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * PredicatePushDown优化器用于将过滤条件进行下推，同样可以减少下层节点所处理的
+ 数据量，提高执行效率。
+ ●当经过ProjectNode时，仅下推确定性的过滤条件，如果包含不确定性的过滤条件如
+ rand函数，则根据不确定性的过滤条件添加一个 FilterNode。
+ ●当经过UnionNode时，将过滤条件下推到Union的所有子查询中。
+ ●对于JoinNode,由于Join操作对应的是两张表，如果过滤条件是针对这两张表的，
+ 则将过滤条件下推到读取对应的表上，并且如果过滤条件的列与连接条件中的列相
+ 同时，则将过滤条件同时下推到Join的左右两侧的表上。如:
+ SELECT★FROM lineitem I JOIN orders ON 1orderkey 二。orderkey where 1 orderkey
+ =1;
+ 过滤条件1 orderkey= 1会被下推到读取表lineitem之上，过滤条件o_ orderkey=1 会
+ 被下推到读取表orders之.上。
+ */
 public class PredicatePushDown
         implements PlanOptimizer
 {

@@ -35,6 +35,12 @@ import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
 
+
+/**
+ * QueryExecution表示一次查询执行，用于启动、停止与管理一个查询，以及统计这个查
+ 询的相关信息。QueryExecution 是一个接口，其实现类有DataDefinitionExecution 、
+ SqlQueryExecution和FailedQueryExecution。
+ */
 public interface QueryExecution
         extends ManagedQueryExecution, TrackedQuery
 {

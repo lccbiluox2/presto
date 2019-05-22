@@ -156,6 +156,12 @@ public class DataDefinitionExecution<T extends Statement>
                 .orElseGet(() -> stateMachine.getBasicQueryInfo(Optional.empty()));
     }
 
+    /**
+     * 可见DataDefinitionExecution的启动比较简单，直接调用与其绑定的DataDefinitionTask
+     实现类的execute方法即可。
+        以DropTable为例，由于DropTable与DropTableTask 绑定，会直接执行DropTableTask
+     的execute方法:
+     */
     @Override
     public void start()
     {
@@ -304,6 +310,16 @@ public class DataDefinitionExecution<T extends Statement>
             this.tasks = requireNonNull(tasks, "tasks is null");
         }
 
+        /**
+         *
+         * @param query
+         * @param session
+         * @param preparedQuery
+         * @param resourceGroup
+         * @param warningCollector
+         * @param queryType
+         * @return
+         */
         @Override
         public DataDefinitionExecution<?> createQueryExecution(
                 String query,

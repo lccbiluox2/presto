@@ -287,6 +287,15 @@ class StatementAnalyzer
             throw new SemanticException(NOT_SUPPORTED, node, "USE statement is not supported");
         }
 
+        /**
+         * 可见处理Insert 语句时，首先分析Insert 所关联的查询语句，然后获取目的表的
+         TableHandle。如果表不存在，则报错;如果表存在，则校验查询语句和目的表的每一列对
+         应的类型是否相同，如果存在列的类型不对应，则抛出异常。
+
+         * @param insert
+         * @param scope
+         * @return
+         */
         @Override
         protected Scope visitInsert(Insert insert, Optional<Scope> scope)
         {
@@ -1022,6 +1031,77 @@ class StatementAnalyzer
             return createAndAssignScope(node, scope, queryScope.getRelationType());
         }
 
+        /**
+         *
+         *
+         * 可见对QuerySpecification的处理分为以下几步。
+         (1)分析From子语句。如果From子语句存在，则使用TupleAnalyzer进行分析返回列
+         描述符;如果不存在，则返回空的列描述符。
+         (2)如果Where子语句存在，则分析Where子语句
+         ●如果Where子语句中包含聚合操作或窗口函数，则抛出异常。
+         ●使用表达式分析器ExpressionAnalyzer分析Where子语句，记录分析后的过滤条件。
+         ●如果Where子语句最后输出的类型不是BOOLEAN类型或NULL类型, 则抛出异常。
+         ●记录QuerySpecification和Where条件对应关系。
+         (3)分析Select 子语句
+         返回结果为FieldOrExpression类型的列表，每- - 个FieldOrExpression表示Select的一
+         列,其中存储了该列在分析From子语句返回的列描述符中的索引下标，或者该列的表达式。
+         循环Select子语句的每一列，根据列的类型进行分析。
+         ●如果列为*或T.*时，则找到列描述符中所对应的Field, 记录这些Field的索引下标，
+         存入FieldOrExpression 中。
+         ●如果为单列,则使用表达式分析器ExpressionAnalyzer对列表达式进行分析，并存储
+         该列表达式到FieldOrExpression中。
+         (4)分析Group By子语句
+         (4)分析Group By子语句
+         返回结果同样为FieldOrExpression类型的列表。如果Group By子语句存在，则循环其
+         每一-列，根据列的类型进行分析。
+         ●如果列为Long类型，则根据该数值查找Select子语句返回的FieldOrExpression 的列
+         表，得到一个FieldOrExpression。
+         ●如果列是一个表达式，则使用表达式分析器ExpressionAnalyzer对列表达式进行分
+         析，并存储该列表达式到FieldOrExpression 中。
+         ●如果列表达式中包含聚合操作或窗口函数，则抛出异常。
+         ●获取列的类型，如果列类型是不可比较的类型，则抛出异常。
+         (5)分析Order By子语句
+         返回结果同样为FieldOrExpression类型的列表。如果Order By子语句存在，则进行分
+         析。首先获取Select子语句中的别名列表,然后循环Oder By子语句的每一列,根据列的类
+         型进行分析。
+         ●如果列为QualifiedNameReference类型且其名称无前缀,则从Select子语句的别名列
+         表中进行查找，如果找不到，则抛出异常。
+         ●如果列为Long类型,则根据该数值查找Select子语句返回的FieldOrExpression的列
+         表，得到一个FieldOrExpression,获取该列的实际类型，如果列类型是不可排序的，
+         则抛出异常。
+         ●如果最终得到的FieldOrExpression 包含的是一个表达式，则使用表达式分析器
+         ExpressionAnalyzer对该表达式进行分析，同样获取列的实际类型，如果该列类型是
+         不可排序的，则抛出异常。
+         ●如果有SelectDistinct语句且OrderBy子语句的列不是Select列的子集,则抛出异常。
+         (6)分析Having子语句
+         如果Having子语句存在，则对其进行分析。使用表达式分析器ExpressionAnalyzer分
+         析Having子语句，获取子语句的类型，如果该类型不是Boolean或Unknown类型，则抛出
+         异常。
+         (7)分析聚合操作
+         此处分析聚合操作是为了记录聚合操作并检验聚合操作的有效性。
+         ●首先分析Select、Order By、Having 子语句，查看其中是否有聚合函数或窗口函数，
+         如果有则获取。
+         ●如果聚合操作中有Distinct 操作且SQL语句为近似查询，则抛出异常。
+         ●分别对Select、Order By、Having 子语句调用verifyAggregations方法。
+         verifyAggregations 方法使用AggregationAnalyzer 对以上传入的子语句进行分析。
+         ●如果子语句中的某些列没有应用聚合函数或窗口函数,而且不在GroupBy子语句中，
+         则抛出异常。
+         (8)分析窗口函数
+         对窗口函数的分析分为以下几步。
+         ●解析出Select、OrderBy子语句中所有的窗口函数,并检验窗口函数的使用是否合法。
+         ●分析窗口函数中是否嵌套了其他的窗口函数，如果有则抛出异常。
+         ●窗口函数中目前不支持Distinct, 因此，如果存在这种情况，则抛出异常。
+         ●如果窗口函数有WindowFrame属性，则检验WindowFrame的有效性。
+         ●获取每个窗口函数的参数，并与系统中注册的窗口函数进行对比，如果找不到对应
+         的窗口函数，则抛出异常。
+         (9)获取输出的列描述符
+         根据From子语句获取的列描述符与Select子语句中的列，计算出最终需要输出的列描
+         述符。
+
+         * @param node
+         * @param scope
+         * @return
+         */
         @Override
         protected Scope visitQuerySpecification(QuerySpecification node, Optional<Scope> scope)
         {

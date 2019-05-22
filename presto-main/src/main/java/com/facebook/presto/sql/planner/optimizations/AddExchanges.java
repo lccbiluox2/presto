@@ -133,6 +133,10 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * 该优化器根据逻辑执行计划生成分布式执行计划。例如针对聚合操作，先在多个节点
+ 上进行局部聚合，最后在单个节点上进行最终聚合。
+ */
 public class AddExchanges
         implements PlanOptimizer
 {
