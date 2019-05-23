@@ -80,6 +80,8 @@ public class InformationSchemaPageSourceProvider
         this.metadata = requireNonNull(metadata, "metadata is null");
     }
 
+
+
     @Override
     public ConnectorPageSource createPageSource(ConnectorTransactionHandle transactionHandle, ConnectorSession session, ConnectorSplit split, List<ColumnHandle> columns)
     {
