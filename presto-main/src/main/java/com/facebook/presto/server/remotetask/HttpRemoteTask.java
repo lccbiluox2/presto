@@ -212,12 +212,17 @@ public final class HttpRemoteTask
         requireNonNull(stats, "stats is null");
 
         try (SetThreadName ignored = new SetThreadName("HttpRemoteTask-%s", taskId)) {
+            /** 创建Task对应的taskID  */
             this.taskId = taskId;
             this.taskLocation = location;
+            /** 对应的session */
             this.session = session;
+            /** 需要启动SqlTaskExecution的Node的NodeID */
             this.nodeId = nodeId;
+            /** planFragment是对当前Stage的抽象描述，其中记录了当前Stage的大部分信息 */
             this.planFragment = planFragment;
             this.totalPartitions = totalPartitions;
+            /** 当前Stage的outputBuffers, outputbuffers用于将当前Stage的结果输出给下游Stage */
             this.outputBuffers.set(outputBuffers);
             this.httpClient = httpClient;
             this.executor = executor;
@@ -231,6 +236,10 @@ public final class HttpRemoteTask
             this.stats = stats;
             this.isBinaryTransportEnabled = isBinaryTransportEnabled;
 
+            /**
+             * //遍万所有的initialSplits, 并將所有的Split対象封装成Scheduledsplit対象，
+             然后放入到pendingSplits中，供start()方法使用
+             */
             for (Entry<PlanNodeId, Split> entry : requireNonNull(initialSplits, "initialSplits is null").entries()) {
                 ScheduledSplit scheduledSplit = new ScheduledSplit(nextSplitId.getAndIncrement(), entry.getKey(), entry.getValue());
                 pendingSplits.put(entry.getKey(), scheduledSplit);

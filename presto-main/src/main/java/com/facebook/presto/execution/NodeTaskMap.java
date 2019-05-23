@@ -29,6 +29,12 @@ import java.util.function.IntConsumer;
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * ( 2 ) NodeTaskMap :
+ 保存了当前Stage分配的Task和节点的映射列表
+ ConcurrentHashMap<Node, NodeTasks> nodeTasksMap, 其中NodeTasks维护了-一个节点对应
+ 的Task列表，并且会对每个Task注册状态监听器，确保Task完成后去Task列表中移除。
+ */
 @ThreadSafe
 public class NodeTaskMap
 {

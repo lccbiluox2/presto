@@ -56,6 +56,16 @@ import static io.airlift.concurrent.MoreFutures.whenAnyCompleteCancelOthers;
 import static java.lang.Math.min;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * (1) NodeScheduler:将task分配给node的核心模块，其包含的功能有以下几个。
+ 1. NodeManager: 获取存活的节点列表，将其保存在NodeMap中,并且定时更新列表中的内容，缓存时长为5秒。
+ 2. NodeMap: 用于存储Presto节点信息，其包含了以下三部分内容。
+   1.1 IP和端口组成的节点列表。
+   1.2 IP 组成的节点列表。
+   2.3 Rack 组成的节点列表。中Rack仅是简单地将节点InetAddress封装成rackId,并且一个节点对应一-个Rack,未接入类似于Hadoop中可配置机架感知脚本的功能。
+ 3. NodeSchedulerConfig:配置了调度的相关参数。
+ 4. NodeSelector: 提供了各个Stage中Task分配节点的算法
+ */
 public class NodeScheduler
 {
     private final NetworkLocationCache networkLocationCache;

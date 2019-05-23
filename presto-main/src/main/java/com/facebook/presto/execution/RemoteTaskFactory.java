@@ -24,6 +24,9 @@ import com.google.common.collect.Multimap;
 
 import java.util.OptionalInt;
 
+/**
+ * 生成RemoteTask的工厂类
+ */
 public interface RemoteTaskFactory
 {
     RemoteTask createRemoteTask(Session session,

@@ -68,6 +68,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+/**
+ * Stage状态监听器
+ */
 @ThreadSafe
 public class StageStateMachine
 {

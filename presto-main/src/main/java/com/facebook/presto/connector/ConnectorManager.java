@@ -77,6 +77,12 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * information schema 包含了每个Catalog 的基础元数据信息，例如可以查询到当前
+ Catalog下所有的表信息及指定表的列信息，这些信息来源于当前Catalog初始化Connector
+ 时向information schema 注册了相关的管理类，详细在com.facebook.presto.connector.
+ ConnectorManager.addConnector方法中:
+ */
 @ThreadSafe
 public class ConnectorManager
 {

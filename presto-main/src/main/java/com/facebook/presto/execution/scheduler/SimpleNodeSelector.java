@@ -48,6 +48,11 @@ public class SimpleNodeSelector
     private static final Logger log = Logger.get(SimpleNodeSelector.class);
 
     private final InternalNodeManager nodeManager;
+    /**
+     * NodeSelector维护了-一个NodeMap, NodeMap 本身根据节点信息维持了三份不同形式
+     的列表。NodeMap的节点信息通过调用NodeManager. getActiveDatasourceNodes获取，采用
+     了Guava的com.google. common.base.Supplier缓存技术:
+     */
     private final NodeTaskMap nodeTaskMap;
     private final boolean includeCoordinator;
     private final AtomicReference<Supplier<NodeMap>> nodeMap;

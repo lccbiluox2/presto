@@ -17,6 +17,10 @@ import java.util.Set;
 
 import static com.facebook.presto.spi.StandardErrorCode.NO_NODES_AVAILABLE;
 
+/**
+ * Presto调度task 时要确保候选node都处于可工作状态，NodeManager 定义了统一的获
+ 取节点入口，在com.facebook.presto.server.CoordinatorModule进行注册和绑定:
+ */
 public interface NodeManager
 {
     Set<Node> getAllNodes();
