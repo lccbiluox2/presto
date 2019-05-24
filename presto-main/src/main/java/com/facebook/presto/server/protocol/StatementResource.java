@@ -85,6 +85,9 @@ import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+/**
+ * //从这里可以看出，所有路径为/v1/statement的URL请求都交给该类提供的RESTful服务处理
+ */
 @Path("/v1/statement")
 public class StatementResource
 {
@@ -131,6 +134,15 @@ public class StatementResource
         queryPurger.shutdownNow();
     }
 
+    /**
+     * 地址为:/v1/statement的POST请求由以下方法处理
+     *
+     * @param statement
+     * @param proto
+     * @param servletRequest
+     * @param uriInfo
+     * @return
+     */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response createQuery(
@@ -155,6 +167,8 @@ public class StatementResource
         SessionContext sessionContext = new HttpRequestSessionContext(servletRequest);
 
         ExchangeClient exchangeClient = exchangeClientSupplier.get(new SimpleLocalMemoryContext(newSimpleAggregatedMemoryContext(), StatementResource.class.getSimpleName()));
+
+        // 在该方法中执行查询
         Query query = Query.create(
                 sessionContext,
                 statement,
@@ -166,10 +180,28 @@ public class StatementResource
                 blockEncodingSerde);
         queries.put(query.getQueryId(), query);
 
+        /**
+         * 获得查询的结果并组装成Response进行返回，从该方法中可以看出第二个参数是空，若该参数为空，则分批返回结果
+         */
         QueryResults queryResults = query.getNextResult(OptionalLong.empty(), uriInfo, proto, DEFAULT_TARGET_RESULT_SIZE);
         return toResponse(query, queryResults);
     }
 
+
+    /**
+     * //地址为:   /v1/statemen/queryID/token  的GET请求由以下方法处理，该方法根据Token值返回
+     queryID对应的查询的部分执行结果，这里的Token主要用于保证分批读取查询结果的顺序。前面章节所说的
+     客户端会不断向Coordinator获取部分的查询执行结果，直到获得了所有的结果。在这个过程中，每次获得部
+     分查询执行结果的请求都是由该方法进行处理的。
+
+     * @param queryId
+     * @param token
+     * @param maxWait
+     * @param targetResultSize
+     * @param proto
+     * @param uriInfo
+     * @param asyncResponse
+     */
     @GET
     @Path("{queryId}/{token}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -261,6 +293,16 @@ public class StatementResource
         return response.build();
     }
 
+    /**
+     * //地址为: /v1/statemen/queryID/ token的DELETE请求，由以下方法处理，该方法用于取消一个
+     Query。在该方法中并没有使用Token,因此Token在这里的作用只是用于区别于QueryResource中的
+     cancleQuery方法，而且该方法与QueryResource中的cancelQuery方法的区别还在于加入了一些特殊情
+     情况的处理和exchangeClient的关闭和清理
+
+     * @param queryId
+     * @param token
+     * @return
+     */
     @DELETE
     @Path("{queryId}/{token}")
     @Produces(MediaType.APPLICATION_JSON)

@@ -65,8 +65,7 @@ import static io.airlift.discovery.client.ServiceAnnouncement.serviceAnnouncemen
 import static io.airlift.json.JsonBinder.jsonBinder;
 import static java.util.Objects.requireNonNull;
 
-public class PrestoServer
-        implements Runnable
+public class PrestoServer implements Runnable
 {
     public static void main(String[] args)
     {
@@ -93,6 +92,7 @@ public class PrestoServer
 
         Logger log = Logger.get(PrestoServer.class);
 
+        /**  加载一堆moudle  */
         ImmutableList.Builder<Module> modules = ImmutableList.builder();
         modules.add(
                 new NodeModule(),
@@ -124,10 +124,19 @@ public class PrestoServer
         Bootstrap app = new Bootstrap(modules.build());
 
         try {
+            /**
+             * 初始化很多系统变量，但是不清楚怎么进入的
+             */
             Injector injector = app.strictConfig().initialize();
 
+            /**
+             * 加载plugin目录下存储的插件
+             */
             injector.getInstance(PluginManager.class).loadPlugins();
 
+            /**
+             * 加载etc/catalog目录下的插件配置文件
+             */
             injector.getInstance(StaticCatalogStore.class).loadCatalogs();
 
             // TODO: remove this huge hack

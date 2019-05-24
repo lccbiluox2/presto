@@ -331,13 +331,29 @@ public class LocalExecutionPlanner
             OrderingCompiler orderingCompiler)
     {
         this.explainAnalyzeContext = requireNonNull(explainAnalyzeContext, "explainAnalyzeContext is null");
+        /**     用于源数据扫描操作，用于构造两个物理操作符：ScanFilterAndProjectOperator和TableScanOperator */
         this.pageSourceProvider = requireNonNull(pageSourceProvider, "pageSourceProvider is null");
+        /**
+         * 用于构造IndexSourceOperator，这个操作符具体什么用于还不清楚
+         */
         this.indexManager = requireNonNull(indexManager, "indexManager is null");
         this.nodePartitioningManager = requireNonNull(nodePartitioningManager, "nodePartitioningManager is null");
+        /**
+         * 用于构造ExchangeOperator，这个客户端会添加一些需要的location，然后从上一个stage通过http请求的方式获取上一个stage计算出的page
+         */
         this.exchangeClientSupplier = exchangeClientSupplier;
         this.metadata = requireNonNull(metadata, "metadata is null");
+        /**
+         * 用于构造一些IdentityHashMap<Expression, Type> expressionTypes或者function
+         */
         this.sqlParser = requireNonNull(sqlParser, "sqlParser is null");
+        /**
+         * 用于构造TableWriterOperator，应该是insert时会用到
+         */
         this.pageSinkManager = requireNonNull(pageSinkManager, "pageSinkManager is null");
+        /**
+         * 用于构造pageprocessor和cursorprocessor，如果把相关代码注释掉，就使用的解释型的
+         */
         this.expressionCompiler = requireNonNull(expressionCompiler, "compiler is null");
         this.pageFunctionCompiler = requireNonNull(pageFunctionCompiler, "pageFunctionCompiler is null");
         this.joinFilterFunctionCompiler = requireNonNull(joinFilterFunctionCompiler, "compiler is null");

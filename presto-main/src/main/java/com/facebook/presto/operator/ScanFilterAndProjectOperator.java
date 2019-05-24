@@ -106,6 +106,9 @@ public class ScanFilterAndProjectOperator
         this.outputMemoryContext = operatorContext.newLocalSystemMemoryContext(ScanFilterAndProjectOperator.class.getSimpleName());
         this.mergingOutput = requireNonNull(mergingOutput, "mergingOutput is null");
 
+        /**
+         * //相关字段类型，具体的可以查看toTypes方法
+         */
         this.pageBuilder = new PageBuilder(ImmutableList.copyOf(requireNonNull(types, "types is null")));
     }
 

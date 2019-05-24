@@ -151,8 +151,14 @@ public class SqlQueryManager
         this.queryPreparer = requireNonNull(queryPreparer, "queryPreparer is null");
 
         this.embedVersion = requireNonNull(embedVersion, "embedVersion is null");
+        /**
+         * 用于为query创建QueryExecution
+         */
         this.executionFactories = requireNonNull(executionFactories, "executionFactories is null");
 
+        /**
+         * 用于在后台提交查询任务
+         */
         this.queryExecutor = newCachedThreadPool(threadsNamed("query-scheduler-%s"));
         this.queryExecutorMBean = new ThreadPoolExecutorMBean((ThreadPoolExecutor) queryExecutor);
 
@@ -162,6 +168,9 @@ public class SqlQueryManager
         this.memoryManager = requireNonNull(memoryManager, "memoryManager is null");
 
         this.queryMonitor = requireNonNull(queryMonitor, "queryMonitor is null");
+        /**
+         * 用于在创建query时，创建location
+         */
         this.locationFactory = requireNonNull(locationFactory, "locationFactory is null");
 
         this.transactionManager = requireNonNull(transactionManager, "transactionManager is null");
