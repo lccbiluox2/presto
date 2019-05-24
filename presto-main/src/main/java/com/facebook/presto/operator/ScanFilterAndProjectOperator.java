@@ -88,7 +88,14 @@ public class ScanFilterAndProjectOperator
             Iterable<Type> types,
             MergingPageOutput mergingOutput)
     {
+        /**
+         * 数据源迭代器，如果是代码生成产生的，则无法跟踪源码；或者注释掉代码生成模块，则可以进行产生解释型的GenericCursorProcessor对象，
+         * 可以进行代码跟踪，特别是可以在聚合操作中看到多通道hash值的产生过程
+         */
         this.cursorProcessor = requireNonNull(cursorProcessor, "cursorProcessor is null");
+        /**
+         * //同cursorProcesso
+         */
         this.pageProcessor = requireNonNull(pageProcessor, "pageProcessor is null");
         this.operatorContext = requireNonNull(operatorContext, "operatorContext is null");
         this.planNodeId = requireNonNull(sourceId, "sourceId is null");
